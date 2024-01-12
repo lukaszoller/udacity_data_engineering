@@ -50,7 +50,7 @@ staging_songs_table_create = """
         artist_name         VARCHAR(500),
         song_id             VARCHAR,
         title               VARCHAR(500),
-        duration            DECIMAL(9),
+        duration            DECIMAL(10),
         year                INTEGER
     );
 """
@@ -60,20 +60,20 @@ songplay_table_create = """
         songplay_id INTEGER IDENTITY(0,1)   NOT NULL SORTKEY,
         start_time  TIMESTAMP               NOT NULL,
         user_id     VARCHAR(50)             NOT NULL DISTKEY,
-        level       VARCHAR(10)             NOT NULL,
-        song_id     VARCHAR(40)             NOT NULL,
+        level       VARCHAR(50)             NOT NULL,
+        song_id     VARCHAR(50)             NOT NULL,
         artist_id   VARCHAR(50)             NOT NULL,
         session_id  VARCHAR(50)             NOT NULL,
         location    VARCHAR(100)            NULL,
-        user_agent  VARCHAR(255)            NULL
+        user_agent  VARCHAR(300)            NULL
     );
 """
 
 user_table_create = """
     CREATE TABLE IF NOT EXISTS users (
         user_id     INTEGER         NOT NULL SORTKEY,
-        first_name  VARCHAR(50)     NULL,
-        last_name   VARCHAR(80)     NULL,
+        first_name  VARCHAR(100)    NULL,
+        last_name   VARCHAR(100)    NULL,
         gender      VARCHAR(10)     NULL,
         level       VARCHAR(10)     NULL
     ) diststyle all;
@@ -85,7 +85,7 @@ song_table_create = """
         title       VARCHAR(500)    NOT NULL,
         artist_id   VARCHAR(50)     NOT NULL,
         year        INTEGER         NOT NULL,
-        duration    DECIMAL(9)      NOT NULL
+        duration    DECIMAL(10)     NOT NULL
     );
 """
 
@@ -94,8 +94,8 @@ artist_table_create = """
         artist_id   VARCHAR(50)             NOT NULL SORTKEY,
         name        VARCHAR(500)            NULL,
         location    VARCHAR(500)            NULL,
-        latitude    DECIMAL(9)              NULL,
-        longitude   DECIMAL(9)              NULL
+        latitude    DECIMAL(10)             NULL,
+        longitude   DECIMAL(10)             NULL
     ) diststyle all;
 """
 
@@ -117,8 +117,7 @@ staging_events_copy = f"""
     COPY staging_events FROM {config.get('S3', 'LOG_DATA')}
     credentials 'aws_iam_role={config.get('IAM_ROLE', 'ARN')}'
     format as json {config.get('S3', 'LOG_JSONPATH')}
-    STATUPDATE ON
-    region 'us-west-2';
+    STATUPDATE ON region 'us-west-2';
 """
 
 staging_songs_copy = f"""
@@ -126,8 +125,7 @@ staging_songs_copy = f"""
     credentials 'aws_iam_role={config.get('IAM_ROLE', 'ARN')}'
     format as json 'auto'
     ACCEPTINVCHARS AS '^'
-    STATUPDATE ON
-    region 'us-west-2';
+    STATUPDATE ON region 'us-west-2';
 """
 
 # FINAL TABLES
@@ -142,18 +140,18 @@ songplay_table_insert = """
         session_id,
         location,
         user_agent)
-    SELECT  DISTINCT TIMESTAMP 'epoch' + se.ts/1000 \
+    SELECT  DISTINCT TIMESTAMP 'epoch' + sp.ts/1000 \
                 * INTERVAL '1 second'   AS start_time,
-            se.userId                   AS user_id,
-            se.level                    AS level,
+            sp.userId                   AS user_id,
+            sp.level                    AS level,
             ss.song_id                  AS song_id,
             ss.artist_id                AS artist_id,
-            se.sessionId                AS session_id,
-            se.location                 AS location,
-            se.userAgent                AS user_agent
-    FROM songplays AS se
-    JOIN staging_songs AS ss ON (se.song = ss.title AND se.artist = ss.artist_name)
-    WHERE se.page = 'NextSong';
+            sp.sessionId                AS session_id,
+            sp.location                 AS location,
+            sp.userAgent                AS user_agent
+    FROM songplays AS sp
+    JOIN staging_songs AS ss ON (sp.song = ss.title AND sp.artist = ss.artist_name)
+    WHERE sp.page = 'NextSong';
 """
 
 user_table_insert = """
@@ -163,13 +161,13 @@ user_table_insert = """
         last_name,
         gender,
         level)
-    SELECT  DISTINCT se.userId  AS user_id,
-            se.firstName        AS first_name,
-            se.lastName         AS last_name,
-            se.gender           AS gender,
-            se.level            AS level
+    SELECT  DISTINCT sp.userId  AS user_id,
+            sp.firstName        AS first_name,
+            sp.lastName         AS last_name,
+            sp.gender           AS gender,
+            sp.level            AS level
     FROM songplays AS se
-    WHERE se.page = 'NextSong';
+    WHERE sp.page = 'NextSong';
 """
 
 song_table_insert = """
@@ -211,7 +209,7 @@ time_table_insert = """
         month,
         year,
         weekday)
-    SELECT  DISTINCT TIMESTAMP 'epoch' + se.ts/1000 \
+    SELECT  DISTINCT TIMESTAMP 'epoch' + sp.ts/1000 \
                 * INTERVAL '1 second'        AS start_time,
             EXTRACT(hour FROM start_time)    AS hour,
             EXTRACT(day FROM start_time)     AS day,
@@ -220,7 +218,7 @@ time_table_insert = """
             EXTRACT(year FROM start_time)    AS year,
             EXTRACT(week FROM start_time)    AS weekday
     FROM    songplays                   AS se
-    WHERE se.page = 'NextSong';
+    WHERE sp.page = 'NextSong';
 """
 
 # ANALYTICAL QUERIES ON FINAL TABLES
@@ -257,8 +255,8 @@ time = """
 
 top_users_most_songs = """
     SELECT u.user_id, u.first_name, u.last_name, COUNT(*) as song_count
-    FROM songplays s
-    JOIN users u ON s.user_id = u.user_id
+    FROM songplays sp
+    JOIN users u ON sp.user_id = u.user_id
     GROUP BY u.user_id, u.first_name, u.last_name
     ORDER BY song_count DESC
     LIMIT 5;
