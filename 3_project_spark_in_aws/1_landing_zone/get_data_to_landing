@@ -1,0 +1,15 @@
+### in aws cloudshell
+git clone https://github.com/udacity/nd027-Data-Engineering-Data-Lakes-AWS-Exercises.git
+
+### go to folder with data
+cd nd027-Data-Engineering-Data-Lakes-AWS-Exercises/project/starter/
+
+### copy data to s3-bucket
+# customer
+aws s3 cp ./customer-1691348231425.json s3://borti-stedi/customer/landing/
+
+# accelerometer
+aws s3 cp ./landing/ s3://borti-stedi/accelerometer/landing/ --recursive
+
+# step_trainer
+aws s3 cp ./landing/ s3://borti-stedi/step_trainer/landing/ --recursive
