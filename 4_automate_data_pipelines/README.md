@@ -59,11 +59,11 @@ Create the data quality operator to run checks on the data using SQL-based test 
 
 ## Reviewing Starter Code
 Before diving into development, familiarize yourself with the following files:
-- [plugins/operators/data_quality.py](plugins/operators/data_quality.py)
-- [plugins/operators/load_fact.py](plugins/operators/load_fact.py)
-- [plugins/operators/load_dimension.py](plugins/operators/load_dimension.py)
-- [plugins/operators/stage_redshift.py](plugins/operators/stage_redshift.py)
-- [plugins/helpers/sql_queries.py](plugins/helpers/sql_queries.py)
+- [plugins/operators/data_quality.py](dags/plugins/operators/data_quality.py)
+- [plugins/operators/load_fact.py](dags/plugins/operators/load_fact.py)
+- [plugins/operators/load_dimension.py](dags/plugins/operators/load_dimension.py)
+- [plugins/operators/stage_redshift.py](dags/plugins/operators/stage_redshift.py)
+- [plugins/helpers/sql_queries.py](dags/plugins/helpers/sql_queries.py)
 - [dags/final_project.py](dags/final_project.py)
 
 Now you're ready to embark on this exciting journey into the world of Data Pipelines with Airflow!

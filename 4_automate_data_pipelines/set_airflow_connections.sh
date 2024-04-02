@@ -20,3 +20,21 @@ airflow connections add redshift \
 # Uncomment and modify the following lines as needed
 echo "Setting S3 bucket variable"
 airflow variables set s3_bucket borti
+
+read -p "Press Enter to exit..."
+
+# Create AWS credentials connection
+echo "Creating AWS credentials connection"
+airflow connections add aws_credentials \
+    --conn-uri 'aws://AKIAQ6K5NW4FHUL3C44H:tH/YNpfJOwMm0yHGfzIxPsFLYN2hOcQCoyWT6A4W'
+
+# Create Redshift connection
+echo "Creating Redshift connection"
+airflow connections add redshift \
+    --conn-uri 'redshift://awsuser:redshiftPassword1@default-workgroup.065157314314.us-east-1.redshift-serverless.amazonaws.com:5439/dev'
+
+# Uncomment and modify the following lines as needed
+echo "Setting S3 bucket variable"
+airflow variables set s3_bucket borti
+
+read -p "Press Enter to exit..."
