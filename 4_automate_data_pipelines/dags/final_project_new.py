@@ -6,8 +6,11 @@ import pendulum
 import os
 from airflow.decorators import dag
 from airflow.operators.dummy import DummyOperator
-from plugins.operators import (StageToRedshiftOperator, LoadFactOperator,
-                       LoadDimensionOperator, DataQualityOperator)
+
+from load_dimension import LoadDimensionOperator
+from load_fact import LoadFactOperator
+from stage_redshift import StageToRedshiftOperator
+from data_quality import DataQualityOperator
 
 default_args = {
     'owner': 'udacity',
