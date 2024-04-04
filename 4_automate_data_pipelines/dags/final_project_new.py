@@ -48,7 +48,7 @@ def final_project_new():
         s3_bucket="udacity-dend",
         s3_key="song_data",
         aws_credentials_id='aws_credentials_id',
-        json_path='not required'
+        json_path='auto'
     )
 
     load_songplays_table = LoadFactOperator(
